@@ -1,0 +1,132 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <title>云图</title>
+    <link rel="stylesheet" href="http://cache.amap.com/lbs/static/main1119.css"/>
+    <script src="http://cache.amap.com/lbs/static/es5.min.js"></script>
+    <script src="http://webapi.amap.com/maps?v=1.3&key=60fe86cba123a4c18890dd0112ac36cf"></script>
+    <script type="text/javascript" src="http://cache.amap.com/lbs/static/addToolbar.js"></script>
+</head>
+<style>
+</style>
+<body>
+<div id="hh" style="width:100%;height:100%;"></div>
+
+<input id="name" type="text" style="position:absolute;z-index:160px;width:300px;height:40px;top:50px;right:20px" value="请输入想要查询的关键字"/>
+<div class="info" >
+    <h4 id='status'></h4><hr>
+    <p id='result'></p><hr>
+    </div>
+<script>
+    // 创建基本图层
+    var map = new AMap.Map('hh', {
+        resizeEnable: true,
+        zoom:16,
+        center: [118.706398,32.176154]
+    });
+    var layer;
+    
+	
+    // 加载云图插件
+    map.plugin(['AMap.CloudDataLayer','AMap.Geolocation'],function(){
+	
+	
+	
+        // 加载表下面的数据
+        layer = new AMap.CloudDataLayer('5c98ba4c305a2a1c2a9d593b');
+        // 将数据渲染到基本图层上
+        layer.setMap(map);
+        
+        // 添加监听事件
+        AMap.event.addListener(layer,'click',function(e){
+            console.log(e);
+            var obj = e.data,
+                address = obj._address,
+                name = obj._name,
+                
+				time=obj.findtime,
+				tel=obj.phone,
+                descp = obj.description,
+                img = '';
+            if(obj._image[0]){
+                img = ['<img width=50% height=50% src="'+obj._image[0]._preurl+'"><br>'];
+            }
+            
+            var str = '<h3><font face="微软雅黑" color="#3366FF">'+name+'</font></h3><hr />'
+                
+				+img.join("")+'<br />'
+                
+                +'地址：'+address+'<br />'
+				+'描述：'+descp+'<br />'
+				+'发现时间：'+time+'<br />'
+				+'联系电话：'+tel+'<br />'
+				;
+            var infoWindow = new AMap.InfoWindow({
+                autoMove:true,
+                offset:new AMap.Pixel(0,0)
+            });
+            
+            infoWindow.setSize(new AMap.Size(300,0));
+            infoWindow.setContent(str);
+            infoWindow.open(map,obj._location);
+        });
+		////////////////////////////////////定位
+		
+		 var geolocation = new AMap.Geolocation({
+            enableHighAccuracy: true,//是否使用高精度定位，默认:true
+            timeout: 10000,          //超过10秒后停止定位，默认：5s
+            buttonPosition:'RB',    //定位按钮的停靠位置
+            buttonOffset: new AMap.Pixel(0, 20),//定位按钮与设置的停靠位置的偏移量，默认：Pixel(10, 20)
+           zoomToAccuracy: false,   //定位成功后是否自动调整地图视野到定位点
+    });
+    
+    // 给输入框绑定回车按钮事件监听
+    document.getElementById('name').onkeydown = function(e){
+        //console.info(e);
+        if(e.keyCode == 13){
+            var text = document.getElementById('name').value;
+            console.info(text);
+            layer.setOptions({
+                query:{keywords:text}
+            });
+        }
+    };
+	 																												//找getelementbyID的影响方式 4-8
+	/////////////////////////////////////////////////////////////////////////定位
+	 map.addControl(geolocation);
+        geolocation.getCurrentPosition(function(status,result){
+            if(status=='complete'){
+                onComplete(result)
+            }else{
+                onError(result)
+            }
+        });
+    });
+    //解析定位结果
+ /*  function onComplete(data) {
+        document.getElementById('status').innerHTML='定位成功'
+        var str = [];
+        str.push('定位结果：' + data.position);
+        str.push('定位类别：' + data.location_type);
+	//	alert(data.position);
+        if(data.accuracy){
+             str.push('精度：' + data.accuracy + ' 米');
+        }//如为IP精确定位结果则没有精度信息
+        str.push('是否经过偏移：' + (data.isConverted ? '是' : '否'));
+        document.getElementById('result').innerHTML = str.join('<br>');
+    }
+    //解析定位错误信息
+    function onError(data) {
+        document.getElementById('status').innerHTML='定位失败'
+        document.getElementById('result').innerHTML = '失败原因排查信息:'+data.message;
+    }
+*/
+	
+	
+
+</script>
+</body>
+</html>
