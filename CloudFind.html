@@ -1,0 +1,122 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <title>云图-寻宠</title>
+    <link rel="stylesheet" href="https://cache.amap.com/lbs/static/main.css"/>
+    <style type="text/css">
+        #panel {
+            position: absolute;
+            background-color: white;
+            max-height: 90%;
+            overflow-y: auto;
+            top: 10px;
+            right: 10px;
+            width: 200px;
+        }
+
+    </style>
+    <script type="text/javascript"
+            src="https://webapi.amap.com/maps?v=1.4.13&key=60fe86cba123a4c18890dd0112ac36cf">
+    </script>
+</head>
+<body style='font-size:12px'>
+<div id="mapContainer"></div>
+<div id="panel"></div>
+<input  type="text" style="position:absolute; z-index:160px; width:300px; height:40px; top:19px; left:37px" value="当前的搜索半径：">
+<input id="name" type="text" style="position:absolute; z-index:160px; width:300px; height:40px; top:60px; left:37px" value="1000"/>
+<script type="text/javascript">
+    //基本地图加载
+    var map = new AMap.Map("mapContainer", {
+        resizeEnable: true,
+        zoom: 15 //地图显示的缩放级别
+    });
+   // var center = [118.706398,32.176154];
+    var search;
+    var searchOptions = {
+        map:map,
+        panel:'panel',
+        keywords:'',
+        pageSize:5,
+        orderBy:'_id:ASC'
+    };
+	var CloudDataSerachOptions={
+	    keywords:'猫',
+	    map:map,
+        panel:'panel',
+        keywords:'',
+        pageSize:5,
+        orderBy:'_id:ASC'
+	
+	};
+		
+AMap.plugin('AMap.Geolocation', function() {
+
+        var geolocation = new AMap.Geolocation({
+            enableHighAccuracy: true,//是否使用高精度定位，默认:true
+            timeout: 10000,          //超过10秒后停止定位，默认：5s
+            buttonPosition:'RB',    //定位按钮的停靠位置
+            buttonOffset: new AMap.Pixel(10, 20),//定位按钮与设置的停靠位置的偏移量，默认：Pixel(10, 20)
+           zoomToAccuracy: false,   //定位成功后是否自动调整地图视野到定位点
+				
+        });
+		
+        map.addControl(geolocation);
+	    
+        geolocation.getCurrentPosition(function(status,result){
+            if(status=='complete'){
+		AMap.service(["AMap.CloudDataSearch"], function() {														//search
+        search = new AMap.CloudDataSearch('5c98ba4c305a2a1c2a9d593b', CloudDataSerachOptions); //
+		var local=result.position;
+
+		var c = document.getElementById('name').value;
+		//alert(c);
+        search.searchNearBy(local,1000, function(){});
+		
+		
+		
+		
+		
+		
+    });
+                onComplete(result)
+            }else{
+                onError(result)
+            }
+        });
+		
+		
+    });
+	
+  
+
+	
+
+    //解析定位结果
+    function onComplete(data) {
+        document.getElementById('status').innerHTML='定位成功'
+        var str = [];
+        //str.push('定位结果：' + data.position);
+//        str.push('定位类别：' + data.location_type);
+		//alert(data.position);
+        if(data.accuracy){
+             str.push('精度：' + data.accuracy + ' 米');
+        }//如为IP精确定位结果则没有精度信息
+        str.push('是否经过偏移：' + (data.isConverted ? '是' : '否'));
+        document.getElementById('result').innerHTML = str.join('<br>');
+		
+    }
+    //解析定位错误信息
+    function onError(data) {
+        document.getElementById('status').innerHTML='定位失败'
+        document.getElementById('result').innerHTML = '失败原因排查信息:'+data.message;
+    }
+
+	
+</script>
+ <script type="text/javascript" src="https://webapi.amap.com/demos/js/liteToolbar.js"></script>
+
+</body>
+</html>
